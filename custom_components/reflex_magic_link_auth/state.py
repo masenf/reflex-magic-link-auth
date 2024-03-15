@@ -6,7 +6,7 @@ import datetime
 import secrets
 import urllib
 
-from sqlmodel import delete, func, update, Session
+from sqlmodel import delete, func, select, update, Session
 
 import reflex as rx
 
@@ -79,6 +79,19 @@ class MagicLinkAuthState(MagicLinkBaseState):
             )
         )
 
+    def _get_client_ip(self) -> str:
+        return getattr(self.router.headers, "x_forwarded_for", self.router.session.client_ip)
+
+    def _count_attempts_from_ip(self, session: Session, delta: datetime.timedelta) -> int:
+        count = session.exec(
+            select(func.count()).where(
+                MagicLinkAuthRecord.client_ip == self._get_client_ip(),
+                MagicLinkAuthRecord.created
+                >= datetime.datetime.now(datetime.timezone.utc) - delta,
+            ),
+        ).one()
+        return count
+
     def _generate_otp(
         self,
         email: str,
@@ -92,6 +105,8 @@ class MagicLinkAuthState(MagicLinkBaseState):
         otp = secrets.token_hex(4)
         recent_attempts = 0
         with rx.session() as session:
+            if self._count_attempts_from_ip(session, expiration_delta) >= rate_limit:
+                return None, None
             record = self._get_current_record(session, email)
             if record is not None:
                 record.update_recent_attempts(session, expiration_delta)
@@ -104,6 +119,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                 otp_hash=MagicLinkAuthRecord.hash_token(otp),
                 expiration=datetime.datetime.now(datetime.timezone.utc)
                 + expiration_delta,
+                client_ip=getattr(self.router.headers, "x_forwarded_for", self.router.session.client_ip),
                 recent_attempts=recent_attempts + 1,
             )
             session.add(record)
@@ -146,7 +162,6 @@ class MagicLinkAuthState(MagicLinkBaseState):
                     auth_session_row.created = auth_session_row.created.replace(
                         tzinfo=datetime.timezone.utc
                     )
-                print(auth_session_row)
                 return auth_session_row
 
     @rx.var

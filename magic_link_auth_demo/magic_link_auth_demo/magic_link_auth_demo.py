@@ -13,7 +13,7 @@ class State(MagicLinkAuthState):
             if record is not None:
                 self.login_error = "Too many attempts. Please try again later."
             else:
-                self.login_error = "Invalid email."
+                self.login_error = "Invalid email, or too many attempts. Please try again later."
             return
         yield rx.redirect("/check-your-email")
         if rx.utils.exec.is_prod_mode():

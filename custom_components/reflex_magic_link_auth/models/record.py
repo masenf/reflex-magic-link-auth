@@ -26,6 +26,7 @@ class MagicLinkAuthRecord(rx.Model, table=True):
             DateTime(timezone=True), server_default=func.now(), nullable=False
         ),
     )
+    client_ip: str = Field(nullable=False)
     # How many times have we regenerated the OTP for this email in the last DEFAULT_OTP_EXPIRATION_DELTA?
     recent_attempts: int = Field(default=0)
 

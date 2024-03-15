@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 91bcd224b03f
+Revision ID: 78a161c9da3b
 Revises: 
-Create Date: 2024-03-14 13:10:39.423093
+Create Date: 2024-03-14 23:45:07.556652
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 import sqlmodel
 
 # revision identifiers, used by Alembic.
-revision: str = '91bcd224b03f'
+revision: str = '78a161c9da3b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,6 +26,7 @@ def upgrade() -> None:
     sa.Column('otp_hash', sa.LargeBinary(), nullable=False),
     sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('expiration', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('client_ip', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('recent_attempts', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
