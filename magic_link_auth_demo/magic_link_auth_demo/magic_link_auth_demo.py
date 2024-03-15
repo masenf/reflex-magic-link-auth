@@ -15,15 +15,14 @@ class State(MagicLinkAuthState):
             else:
                 self.login_error = "Invalid email."
             return
+        yield rx.redirect("/check-your-email")
         if rx.utils.exec.is_prod_mode():
             try:
                 send_magic_link_mailgun(record.email, self._get_magic_link(record, otp))
             except Exception as e:
-                self.login_error = f"Failed to send magic link. Contact administrator."
-                return
+                print(e)
         else:
             print(self._get_magic_link(record, otp))
-        return rx.redirect("/check-your-email")
 
 
 def login_form() -> rx.Component:

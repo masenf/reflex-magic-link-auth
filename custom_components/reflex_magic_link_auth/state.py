@@ -29,13 +29,13 @@ class MagicLinkBaseState(rx.State):
         """Callback that accepts and stores the frontend URL for validating OTP."""
         self.auth_url = urllib.parse.urljoin(base_url, AUTH_ROUTE)
 
-    def _get_magic_link(self, record: MagicLinkAuthRecord, otp: str):
+    def _get_magic_link(self, record: MagicLinkAuthRecord, otp: str, redir: str = "/"):
         """Helper function to format the magic link URL."""
         url_parts = urllib.parse.urlparse(self.auth_url)
         return urllib.parse.urlunparse(
             url_parts._replace(
                 query=urllib.parse.urlencode(
-                    {"email": record.email, "otp": otp, "redir": "/"},
+                    {"email": record.email, "otp": otp, "redir": redir},
                 ),
             ),
         )
@@ -52,7 +52,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
         return session.exec(
             MagicLinkAuthRecord.select()
             .where(
-                MagicLinkAuthRecord.email == email,
+                MagicLinkAuthRecord.email == email.lower(),
                 MagicLinkAuthRecord.expiration >= func.now(),
             )
             .order_by(MagicLinkAuthRecord.created.desc())
@@ -64,7 +64,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
         session.exec(
             update(MagicLinkAuthRecord)
             .where(
-                MagicLinkAuthRecord.email == email,
+                MagicLinkAuthRecord.email == email.lower(),
                 MagicLinkAuthRecord.expiration >= func.now(),
             )
             .values(
@@ -74,7 +74,9 @@ class MagicLinkAuthState(MagicLinkBaseState):
 
     def _delete_all_otps(self, session: Session, email: str):
         session.exec(
-            delete(MagicLinkAuthRecord).where(MagicLinkAuthRecord.email == email)
+            delete(MagicLinkAuthRecord).where(
+                MagicLinkAuthRecord.email == email.lower()
+            )
         )
 
     def _generate_otp(
@@ -98,7 +100,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                 recent_attempts = record.recent_attempts
                 self._expire_outstanding_otps(session, email)
             record = MagicLinkAuthRecord(  # type: ignore
-                email=email,
+                email=email.lower(),
                 otp_hash=MagicLinkAuthRecord.hash_token(otp),
                 expiration=datetime.datetime.now(datetime.timezone.utc)
                 + expiration_delta,
@@ -144,6 +146,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                     auth_session_row.created = auth_session_row.created.replace(
                         tzinfo=datetime.timezone.utc
                     )
+                print(auth_session_row)
                 return auth_session_row
 
     @rx.var

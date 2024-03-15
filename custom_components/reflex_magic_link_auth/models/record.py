@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import hashlib
 
 import bcrypt
 from sqlmodel import Column, DateTime, Field, func, Session, select
@@ -59,13 +60,15 @@ class MagicLinkAuthRecord(rx.Model, table=True):
 
     def persistent_id(self) -> str:
         """Return a unique identifier for the user."""
-        return self.hash_token(self.email).decode("utf-8")
+        return hashlib.sha256(
+            self.email.lower().encode("utf-8"),
+        ).hexdigest()
 
     def update_recent_attempts(self, session: Session, delta: datetime.timedelta):
         """Update the recent_attempts count for this email."""
         self.recent_attempts = session.exec(
             select(func.count()).where(
-                MagicLinkAuthRecord.email == self.email,
+                MagicLinkAuthRecord.email == self.email.lower(),
                 MagicLinkAuthRecord.created
                 >= datetime.datetime.now(datetime.timezone.utc) - delta,
             ),
