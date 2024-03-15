@@ -20,6 +20,7 @@ keywords = [
 dependencies = [
     "reflex>=0.4.2",
     "bcrypt",
+    "httpx",
 ]
 
 classifiers = [
