@@ -10,7 +10,7 @@ from sqlmodel import delete, func, select, update, Session
 
 import reflex as rx
 
-from .constants import AUTH_ROUTE, DEFAULT_OTP_EXPIRATION_DELTA, DEFAULT_OTP_RATE_LIMIT
+from . import constants
 from .models import MagicLinkAuthRecord, MagicLinkAuthSession
 
 
@@ -27,7 +27,7 @@ class MagicLinkBaseState(rx.State):
 
     def get_auth_url_cb(self, base_url):
         """Callback that accepts and stores the frontend URL for validating OTP."""
-        self.auth_url = urllib.parse.urljoin(base_url, AUTH_ROUTE)
+        self.auth_url = urllib.parse.urljoin(base_url, constants.AUTH_ROUTE)
 
     def _get_magic_link(self, record: MagicLinkAuthRecord, otp: str, redir: str = "/"):
         """Helper function to format the magic link URL."""
@@ -95,14 +95,17 @@ class MagicLinkAuthState(MagicLinkBaseState):
     def _generate_otp(
         self,
         email: str,
-        expiration_delta: datetime.timedelta = DEFAULT_OTP_EXPIRATION_DELTA,
-        rate_limit: int = DEFAULT_OTP_RATE_LIMIT,
+        expiration_delta: datetime.timedelta | None = None,
+        rate_limit: int | None = None,
     ) -> tuple[MagicLinkAuthRecord | None, str | None]:
         if not email:
             return None, None
         if "@" not in email[1:]:
             return None, None
-        otp = secrets.token_hex(4)
+        if expiration_delta is None:
+            expiration_delta = constants.DEFAULT_OTP_EXPIRATION_DELTA
+        if rate_limit is None:
+            rate_limit = constants.DEFAULT_OTP_RATE_LIMIT
         recent_attempts = 0
         with rx.session() as session:
             if self._count_attempts_from_ip(session, expiration_delta) >= rate_limit:
@@ -114,6 +117,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                     return record, None
                 recent_attempts = record.recent_attempts
                 self._expire_outstanding_otps(session, email)
+            otp = secrets.token_hex(4)
             record = MagicLinkAuthRecord(  # type: ignore
                 email=email.lower(),
                 otp_hash=MagicLinkAuthRecord.hash_token(otp),

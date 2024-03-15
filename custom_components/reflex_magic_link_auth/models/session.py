@@ -9,7 +9,7 @@ from sqlmodel import Column, DateTime, Field, func
 
 import reflex as rx
 
-from ..constants import DEFAULT_AUTH_SESSION_EXPIRATION_DELTA
+from .. import constants
 from .record import MagicLinkAuthRecord
 
 
@@ -36,8 +36,10 @@ class MagicLinkAuthSession(rx.Model, table=True):
     def from_record(
         cls,
         record: MagicLinkAuthRecord,
-        expiration_delta: datetime.timedelta = DEFAULT_AUTH_SESSION_EXPIRATION_DELTA,
+        expiration_delta: datetime.timedelta | None = None,
     ) -> MagicLinkAuthSession:
+        if expiration_delta is None:
+            expiration_delta = constants.DEFAULT_AUTH_SESSION_EXPIRATION_DELTA
         return cls(
             email=record.email,
             persistent_id=record.persistent_id(),

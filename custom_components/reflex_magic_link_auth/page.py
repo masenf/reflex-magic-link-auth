@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from .constants import AUTH_ROUTE
+from . import constants
 from .state import MagicLinkAuthState
 
 
@@ -23,7 +23,7 @@ class HandleMagicLinkState(MagicLinkAuthState):
             return rx.redirect(redir)
 
 
-@rx.page(AUTH_ROUTE, on_load=HandleMagicLinkState.on_load)
+@rx.page(constants.AUTH_ROUTE, on_load=HandleMagicLinkState.on_load)
 def magic_link_auth_page():
     """Simple page component for handling magic link authentication in query params."""
     return rx.vstack(
