@@ -44,7 +44,7 @@ class MagicLinkBaseState(rx.State):
 class MagicLinkAuthState(MagicLinkBaseState):
     """State for handling generation and validation of OTP."""
 
-    session_token: str = rx.LocalStorage()
+    session_token: str = rx.LocalStorage(sync=True)
 
     def _get_current_record(
         self, session: Session, email: str

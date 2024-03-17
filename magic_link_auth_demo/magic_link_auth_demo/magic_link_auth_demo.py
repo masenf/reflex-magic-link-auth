@@ -68,7 +68,16 @@ def index() -> rx.Component:
 def check_your_email() -> rx.Component:
     return rx.vstack(
         rx.heading("Check your email for a magic link!", size="9"),
-        rx.text("You may close this tab."),
+        rx.text("This page will redirect when your session is validated."),
+        rx.moment(
+            interval=rx.cond(
+                MagicLinkAuthState.session_is_valid,
+                500,
+                0,
+            ),
+            on_change=rx.redirect("/"),
+            display="none",
+        ),
         align="center",
         spacing="7",
     )
