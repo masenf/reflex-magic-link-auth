@@ -1,45 +1,82 @@
 import reflex as rx
 
+import reflex_google_recaptcha_v2
 from reflex_magic_link_auth import MagicLinkAuthState, send_magic_link_mailgun
 
+# These are test keys
+reflex_google_recaptcha_v2.set_site_key("6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")
+reflex_google_recaptcha_v2.set_secret_key("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")
 
-class State(MagicLinkAuthState):
+
+class State(rx.State):
     login_error: str = ""
 
-    def handle_submit_login(self, form_data):
+    async def handle_submit_login(self, form_data):
+        magic_link = await self.get_state(MagicLinkAuthState)
         self.login_error = ""
-        record, otp = self._generate_otp(form_data["email"])
+        record, otp = magic_link._generate_otp(form_data["email"])
         if otp is None:
             if record is not None:
                 self.login_error = "Too many attempts. Please try again later."
             else:
-                self.login_error = "Invalid email, or too many attempts. Please try again later."
+                self.login_error = (
+                    "Invalid email, or too many attempts. Please try again later."
+                )
             return
+        if rx.utils.exec.is_prod_mode():
+            recaptcha_state = await self.get_state(
+                reflex_google_recaptcha_v2.GoogleRecaptchaV2State
+            )
+            if not recaptcha_state.token_is_valid:
+                self.login_error = "Captcha verification failed. Please try again."
+                return
         yield rx.redirect("/check-your-email")
         if rx.utils.exec.is_prod_mode():
             try:
-                send_magic_link_mailgun(record.email, self._get_magic_link(record, otp))
+                send_magic_link_mailgun(
+                    record.email,
+                    magic_link._get_magic_link(record, otp),
+                )
             except Exception as e:
                 print(e)
         else:
-            print(self._get_magic_link(record, otp))
+            print(magic_link._get_magic_link(record, otp))
+
+
+def login_controls() -> rx.Component:
+    return rx.vstack(
+        rx.input.root(
+            rx.input(name="email", placeholder="Email", type="email"),
+            width="100%",
+        ),
+        (
+            reflex_google_recaptcha_v2.google_recaptcha_v2()
+            if rx.utils.exec.is_prod_mode()
+            else rx.fragment()
+        ),
+        rx.button("Send Magic Link", width="100%"),
+    )
 
 
 def login_form() -> rx.Component:
-    return rx.vstack(
-        rx.heading("Enter your email to log in", size="9"),
-        rx.cond(
-            State.login_error,
-            rx.callout.root(
-                rx.callout.text(State.login_error, color="red"),
+    return rx.card(
+        rx.vstack(
+            rx.heading("Enter your email to log in", size="8", margin_bottom="10px"),
+            rx.cond(
+                State.login_error,
+                rx.callout.root(
+                    rx.callout.text(State.login_error, color="red"),
+                    width="100%",
+                ),
             ),
+            rx.form(
+                login_controls(),
+                on_submit=State.handle_submit_login,
+                on_mount=MagicLinkAuthState.get_base_url,
+            ),
+            align="center",
         ),
-        rx.form(
-            rx.input(name="email"),
-            rx.button("Send Magic Link"),
-            on_submit=State.handle_submit_login,
-            on_mount=MagicLinkAuthState.get_base_url,
-        ),
+        margin="25px",
     )
 
 
@@ -59,7 +96,7 @@ def index() -> rx.Component:
         rx.cond(
             MagicLinkAuthState.session_is_valid,
             home(),
-            login_form(),
+            rx.vstack(login_form(), align="center"),
         ),
     )
 
