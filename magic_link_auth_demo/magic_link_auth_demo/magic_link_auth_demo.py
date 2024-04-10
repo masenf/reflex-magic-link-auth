@@ -11,6 +11,10 @@ reflex_google_recaptcha_v2.set_secret_key("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4Wif
 class State(rx.State):
     login_error: str = ""
 
+    @rx.cached_var
+    def is_prod_mode(self):
+        return rx.utils.exec.is_prod_mode()
+
     async def handle_submit_login(self, form_data):
         magic_link = await self.get_state(MagicLinkAuthState)
         self.login_error = ""
@@ -23,7 +27,7 @@ class State(rx.State):
                     "Invalid email, or too many attempts. Please try again later."
                 )
             return
-        if rx.utils.exec.is_prod_mode():
+        if self.is_prod_mode:
             recaptcha_state = await self.get_state(
                 reflex_google_recaptcha_v2.GoogleRecaptchaV2State
             )
@@ -31,7 +35,7 @@ class State(rx.State):
                 self.login_error = "Captcha verification failed. Please try again."
                 return
         yield rx.redirect("/check-your-email")
-        if rx.utils.exec.is_prod_mode():
+        if self.is_prod_mode:
             try:
                 send_magic_link_mailgun(
                     record.email,
@@ -49,10 +53,9 @@ def login_controls() -> rx.Component:
             rx.input(name="email", placeholder="Email", type="email"),
             width="100%",
         ),
-        (
-            reflex_google_recaptcha_v2.google_recaptcha_v2()
-            if rx.utils.exec.is_prod_mode()
-            else rx.fragment()
+        rx.cond(
+            State.is_prod_mode,
+            reflex_google_recaptcha_v2.google_recaptcha_v2(),
         ),
         rx.button("Send Magic Link", width="100%"),
     )
@@ -123,3 +126,6 @@ def check_your_email() -> rx.Component:
 # Add state and page to the app.
 app = rx.App()
 app.add_page(index)
+
+# Create the database if it does not exist (hosting service does not migrate automatically)
+rx.Model.migrate()
