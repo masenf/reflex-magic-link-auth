@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reflex-magic-link-auth"
-version = "0.0.2"
-description = "Reflex custom component magic-link-auth"
+version = "0.0.3"
+description = "Login with magic links sent via email"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
