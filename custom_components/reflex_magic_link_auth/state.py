@@ -145,7 +145,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                 return True
         return False
 
-    @rx.cached_var
+    @rx.var(cache=True)
     def auth_session(self) -> MagicLinkAuthSession | None:
         with rx.session() as session:
             auth_session_row = session.exec(

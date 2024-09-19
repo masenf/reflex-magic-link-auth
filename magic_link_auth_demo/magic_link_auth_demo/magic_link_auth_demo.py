@@ -11,7 +11,7 @@ reflex_google_recaptcha_v2.set_secret_key("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4Wif
 class State(rx.State):
     login_error: str = ""
 
-    @rx.cached_var
+    @rx.var(cache=True)
     def is_prod_mode(self):
         return rx.utils.exec.is_prod_mode()
 
@@ -49,10 +49,7 @@ class State(rx.State):
 
 def login_controls() -> rx.Component:
     return rx.vstack(
-        rx.input.root(
-            rx.input(name="email", placeholder="Email", type="email"),
-            width="100%",
-        ),
+        rx.input(name="email", placeholder="Email", type="email", width="100%"),
         rx.cond(
             State.is_prod_mode,
             reflex_google_recaptcha_v2.google_recaptcha_v2(),
