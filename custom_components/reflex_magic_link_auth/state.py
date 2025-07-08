@@ -85,9 +85,14 @@ class MagicLinkAuthState(MagicLinkBaseState):
         session.commit()
 
     def _get_client_ip(self) -> str:
-        return getattr(
-            self.router.headers, "x_forwarded_for", self.router.session.client_ip
+        forwarded_for = self.router.headers.raw_headers.get(
+            "x-forwarded-for",
+            self.router.session.client_ip,
         )
+        if forwarded_for and "," in forwarded_for:
+            # Extract the first IP address from the comma-separated list
+            return forwarded_for.split(",")[0].strip()
+        return forwarded_for
 
     def _count_attempts_from_ip(
         self,
@@ -135,11 +140,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                 expiration=(
                     datetime.datetime.now(datetime.timezone.utc) + expiration_delta
                 ),
-                client_ip=getattr(
-                    self.router.headers,
-                    "x_forwarded_for",
-                    self.router.session.client_ip,
-                ),
+                client_ip=self._get_client_ip(),
                 recent_attempts=recent_attempts + 1,
             )
             session.add(record)
