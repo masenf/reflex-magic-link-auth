@@ -13,7 +13,7 @@ class HandleMagicLinkState(MagicLinkAuthState):
 
     @rx.event
     def on_load(self):
-        params = self.router.page.params
+        params = self.router.url.query_parameters
         email = params.get("email")
         otp = params.get("otp")
         redir = params.get("redir")
