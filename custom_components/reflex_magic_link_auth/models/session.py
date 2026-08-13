@@ -17,6 +17,9 @@ class MagicLinkAuthSession(rx.Model, table=True):
     persistent_id: str = Field(index=True, nullable=False)
     session_token: str = Field(unique=True, index=True, nullable=False)
     created: datetime.datetime = Field(
+        # Populated by the column's server_default on insert, so it is never
+        # passed to the constructor.
+        default=None,
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),

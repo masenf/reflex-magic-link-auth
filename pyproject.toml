@@ -14,7 +14,9 @@ keywords = [
     "reflex-custom-components"]
 
 dependencies = [
-    "reflex>=0.8.4",
+    # The db extra: this component imports sqlmodel directly, and reflex made
+    # it optional, so a plain `reflex` dependency leaves the import unresolved.
+    "reflex[db]>=0.8.4",
     "bcrypt",
     "httpx",
 ]
