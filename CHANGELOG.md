@@ -10,6 +10,13 @@ written; alpha releases are omitted.
 
 <!-- towncrier release notes start -->
 
+## v0.2.2a1 (2026-08-13)
+
+### Features
+
+- Every value in `constants` can now be set by environment variable — `MAGIC_LINK_AUTH_ROUTE`, `MAGIC_LINK_AUTH_OTP_EXPIRATION_SECONDS`, `MAGIC_LINK_AUTH_SESSION_EXPIRATION_SECONDS` and `MAGIC_LINK_AUTH_OTP_RATE_LIMIT` — so a deployment can tune the magic link lifetime, session lifetime, rate limit and auth route without a code change. A variable set to something unusable raises on import rather than silently falling back to the default. ([#8](https://github.com/masenf/reflex-magic-link-auth/issues/8))
+
+
 ## v0.2.1 (2026-08-13)
 
 ### Bug Fixes
