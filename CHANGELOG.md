@@ -10,7 +10,7 @@ written; alpha releases are omitted.
 
 <!-- towncrier release notes start -->
 
-## v0.2.1a1 (2026-08-13)
+## v0.2.1 (2026-08-13)
 
 ### Bug Fixes
 
