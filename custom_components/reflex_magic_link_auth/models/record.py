@@ -6,11 +6,12 @@ import datetime
 import hashlib
 
 import bcrypt
-import reflex as rx
 from sqlmodel import Column, DateTime, Field, Session, func, select
 
+from .base import MagicLinkAuthModel
 
-class MagicLinkAuthRecord(rx.Model, table=True):
+
+class MagicLinkAuthRecord(MagicLinkAuthModel, table=True):
     email: str
     otp_hash: bytes
     created: datetime.datetime = Field(

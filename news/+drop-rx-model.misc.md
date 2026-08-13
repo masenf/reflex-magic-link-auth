@@ -1,0 +1,1 @@
+`MagicLinkAuthRecord` and `MagicLinkAuthSession` are now defined on SQLModel directly rather than on `rx.Model`, which Reflex deprecated in 0.9.2 and removes in 1.0. Table names, columns, and the `select()` helper are unchanged, so existing databases need no migration.

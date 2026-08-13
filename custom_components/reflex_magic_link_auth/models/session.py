@@ -5,14 +5,14 @@ from __future__ import annotations
 import datetime
 import secrets
 
-import reflex as rx
 from sqlmodel import Column, DateTime, Field, func
 
 from .. import constants
+from .base import MagicLinkAuthModel
 from .record import MagicLinkAuthRecord
 
 
-class MagicLinkAuthSession(rx.Model, table=True):
+class MagicLinkAuthSession(MagicLinkAuthModel, table=True):
     email: str = Field(index=True, nullable=False)
     persistent_id: str = Field(index=True, nullable=False)
     session_token: str = Field(unique=True, index=True, nullable=False)
