@@ -90,7 +90,7 @@ short markdown file under `news/`, named `<pr-number>.<type>.md`, written for
 someone reading release notes:
 
 ```bash
-uvx --from "reflex-release @ git+https://github.com/reflex-dev/reflex@5baf859f9858f35a31e8b7790496119100e8b2cc#subdirectory=packages/reflex-release" \
+uvx --from "reflex-release @ git+https://github.com/reflex-dev/reflex@6d1f46663b4d5a9d193798689e8aa683d50e5172#subdirectory=packages/reflex-release" \
   reflex-release create 123.bugfix.md
 ```
 

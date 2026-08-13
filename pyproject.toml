@@ -67,7 +67,16 @@ fallback_version = "0.0.0.dev0"
 # becomes `uvx reflex-release@<version>`; either way, re-run
 # `reflex-release sync` after changing it — the pull-request drift check fails
 # until the generated workflows match.
-cli-command = 'uvx --from "reflex-release @ git+https://github.com/reflex-dev/reflex@5baf859f9858f35a31e8b7790496119100e8b2cc#subdirectory=packages/reflex-release" reflex-release'
+cli-command = 'uvx --from "reflex-release @ git+https://github.com/reflex-dev/reflex@6d1f46663b4d5a9d193798689e8aa683d50e5172#subdirectory=packages/reflex-release" reflex-release'
+# Stated explicitly rather than left to the tool's default, which is a
+# security-relevant policy and has already changed once between versions. True
+# is GitHub's own behavior: the pypi environment's reviewer list decides who may
+# release, and one of them can carry a release through end to end. That is the
+# workable setting for a repository with a single maintainer — requiring a
+# second approver would leave releases permanently stuck. Set it to false to
+# require two people, which also makes publish.yml assert that the pypi
+# environment has 'Prevent self-review' enabled.
+allow-self-review = true
 root-package = "reflex-magic-link-auth"
 # The component does not use a src/ layout and the import package sits one level
 # down, so the source directory has to be named explicitly: without this the
