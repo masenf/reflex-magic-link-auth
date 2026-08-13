@@ -14,6 +14,9 @@ class MagicLinkAuthRecord(rx.Model, table=True):
     email: str
     otp_hash: bytes
     created: datetime.datetime = Field(
+        # Populated by the column's server_default on insert, so it is never
+        # passed to the constructor.
+        default=None,
         sa_column=Column(
             DateTime(timezone=True),
             server_default=func.now(),

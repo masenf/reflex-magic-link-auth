@@ -134,7 +134,7 @@ class MagicLinkAuthState(MagicLinkBaseState):
                 recent_attempts = record.recent_attempts
                 self._expire_outstanding_otps(session, email)
             otp = secrets.token_hex(4)
-            record = MagicLinkAuthRecord(  # type: ignore
+            record = MagicLinkAuthRecord(
                 email=email.lower(),
                 otp_hash=MagicLinkAuthRecord.hash_token(otp),
                 expiration=(
