@@ -10,6 +10,17 @@ written; alpha releases are omitted.
 
 <!-- towncrier release notes start -->
 
+## v0.2.1a1 (2026-08-13)
+
+### Bug Fixes
+
+- Depend on `reflex[db]`. This component imports `sqlmodel` directly, and Reflex made it an optional extra, so installing against a recent Reflex left the import unsatisfied. ([#6](https://github.com/masenf/reflex-magic-link-auth/issues/6))
+
+### Miscellaneous
+
+- Releases are now changelog-driven. Entries accumulate as news fragments under `news/`, the Dispatch release workflow materializes them into `CHANGELOG.md` at the next version, and merging that pull request is what publishes — behind a required human approval on the `pypi` environment. Tags and GitHub releases are created only after a successful upload, so a failed release is retried by pushing a fix rather than by deleting a tag. ([#6](https://github.com/masenf/reflex-magic-link-auth/issues/6))
+
+
 ## v0.2.0.post1 (2025-09-05)
 
 ### Miscellaneous
