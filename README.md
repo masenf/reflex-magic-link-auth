@@ -79,6 +79,42 @@ originating from reflex-magic-link-auth.
 To log the user out, trigger the event handler
 `reflex_magic_link_auth.MagicLinkAuthState.logout`.
 
+## Configuration
+
+The values in `reflex_magic_link_auth.constants` can each be overridden by an
+environment variable, so a deployment can tune them without a code change:
+
+| Environment variable | Constant | Default |
+| --- | --- | --- |
+| `MAGIC_LINK_AUTH_ROUTE` | `AUTH_ROUTE` | `/magic-link-auth` |
+| `MAGIC_LINK_AUTH_OTP_EXPIRATION_SECONDS` | `DEFAULT_OTP_EXPIRATION_DELTA` | `1800` (30 minutes) |
+| `MAGIC_LINK_AUTH_SESSION_EXPIRATION_SECONDS` | `DEFAULT_AUTH_SESSION_EXPIRATION_DELTA` | `604800` (7 days) |
+| `MAGIC_LINK_AUTH_OTP_RATE_LIMIT` | `DEFAULT_OTP_RATE_LIMIT` | `5` |
+
+```bash
+export MAGIC_LINK_AUTH_OTP_EXPIRATION_SECONDS=300   # 5 minute magic links
+export MAGIC_LINK_AUTH_OTP_RATE_LIMIT=3
+```
+
+`MAGIC_LINK_AUTH_OTP_EXPIRATION_SECONDS` sets both how long an OTP stays valid
+and the window the per-email and per-IP rate limits are counted over.
+
+The environment is read once, when the package is imported. `AUTH_ROUTE` is
+consumed at import time to register the page, so the variables must be set
+before your app imports `reflex_magic_link_auth` — which is the normal case for
+a process started with them already in place.
+
+A variable that is set to something unusable — a route that is not an absolute
+path, a non-numeric duration, a rate limit below 1 — raises `ValueError` on
+import instead of falling back to the default. These values bound how long a
+credential lives and how often one can be requested, so a typo should stop the
+app rather than quietly weaken it. Setting a variable to an empty string means
+"no opinion" and keeps the default.
+
+Values passed explicitly still win: `_generate_otp` takes `expiration_delta`
+and `rate_limit`, and `MagicLinkAuthSession.from_record` takes
+`expiration_delta`. The constants are only the fallback.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
