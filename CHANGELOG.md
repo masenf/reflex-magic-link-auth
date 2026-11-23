@@ -10,6 +10,13 @@ written; alpha releases are omitted.
 
 <!-- towncrier release notes start -->
 
+## v0.2.3 (2026-11-23)
+
+### Miscellaneous
+
+- Depend on `httpx2` instead of `httpx`, following Reflex. The Mailgun provider now sends with `httpx2`. ([#11](https://github.com/masenf/reflex-magic-link-auth/issues/11))
+
+
 ## v0.2.2 (2026-08-13)
 
 ### Features
