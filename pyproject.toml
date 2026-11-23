@@ -18,7 +18,7 @@ dependencies = [
     # it optional, so a plain `reflex` dependency leaves the import unresolved.
     "reflex[db]>=0.8.4",
     "bcrypt",
-    "httpx",
+    "httpx2",
 ]
 
 classifiers = [

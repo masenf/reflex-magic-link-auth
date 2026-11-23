@@ -1,7 +1,7 @@
 import os
 import urllib.parse
 
-import httpx
+import httpx2
 import reflex as rx
 
 config = rx.config.get_config()
@@ -37,7 +37,7 @@ def email_html():
     return os.environ.get("MAGIC_LINK_EMAIL_HTML", DEFAULT_HTML)
 
 
-def send_magic_link_mailgun(email: str, magic_link: str) -> httpx.Response:
+def send_magic_link_mailgun(email: str, magic_link: str) -> httpx2.Response:
     """Send magic link email to user."""
     if API_KEY is None:
         raise ValueError("MAILGUN_API_KEY is required to send magic link emails.")
@@ -47,6 +47,6 @@ def send_magic_link_mailgun(email: str, magic_link: str) -> httpx.Response:
         "subject": email_subject(),
         "html": email_html().format(magic_link=magic_link),
     }
-    response = httpx.post(messages_endpoint(), data=data, auth=("api", API_KEY))
+    response = httpx2.post(messages_endpoint(), data=data, auth=("api", API_KEY))
     response.raise_for_status()
     return response
